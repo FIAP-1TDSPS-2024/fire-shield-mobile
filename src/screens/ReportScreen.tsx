@@ -5,12 +5,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   Alert,
   Image,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
@@ -78,7 +78,13 @@ export default function ReportScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Reportar Ocorrência</Text>
         <Text style={styles.subtitle}>Ajude a comunidade registrando focos de incêndio.</Text>
 
@@ -135,6 +141,7 @@ export default function ReportScreen() {
           placeholderTextColor="#999"
           multiline
           numberOfLines={4}
+          blurOnSubmit
           value={description}
           onChangeText={setDescription}
         />
@@ -143,7 +150,7 @@ export default function ReportScreen() {
           <MaterialCommunityIcons name="alarm-light" size={20} color="#fff" />
           <Text style={styles.submitText}>Enviar Alerta</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
@@ -151,7 +158,7 @@ export default function ReportScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   centerContent: { alignItems: 'center', justifyContent: 'center' },
-  scroll: { padding: 20 },
+  scroll: { padding: 20, paddingBottom: 40 },
   title: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e', marginBottom: 4 },
   subtitle: { fontSize: 14, color: '#666', marginBottom: 20 },
   locationBox: {

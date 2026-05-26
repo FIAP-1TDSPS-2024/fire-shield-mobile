@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import { MOCK_USER, MOCK_USER_REPORTS } from '../data/mockData';
@@ -40,7 +40,13 @@ export default function ProfileScreen({ onLogout }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={24}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
@@ -53,6 +59,8 @@ export default function ProfileScreen({ onLogout }: Props) {
               value={name}
               onChangeText={setName}
               autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleSave}
             />
           ) : (
             <Text style={styles.profileName}>{name}</Text>
@@ -66,11 +74,7 @@ export default function ProfileScreen({ onLogout }: Props) {
             style={styles.editBtn}
             onPress={editing ? handleSave : () => setEditing(true)}
           >
-            <Ionicons
-              name={editing ? 'checkmark' : 'pencil-outline'}
-              size={14}
-              color="#fff"
-            />
+            <Ionicons name={editing ? 'checkmark' : 'pencil-outline'} size={14} color="#fff" />
             <Text style={styles.editBtnText}>{editing ? 'Salvar' : 'Editar Perfil'}</Text>
           </TouchableOpacity>
         </View>
@@ -141,14 +145,14 @@ export default function ProfileScreen({ onLogout }: Props) {
           <Ionicons name="log-out-outline" size={18} color="#E53935" />
           <Text style={styles.logoutText}>Sair da Conta</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  scroll: { padding: 16 },
+  scroll: { padding: 16, paddingBottom: 40 },
   profileHeader: {
     backgroundColor: '#1a1a2e',
     borderRadius: 16,

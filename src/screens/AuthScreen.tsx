@@ -5,12 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type Props = {
@@ -35,88 +33,99 @@ export default function AuthScreen({ onLogin }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.logoArea}>
-            <MaterialCommunityIcons name="fire" size={72} color="#FF6B35" />
-            <Text style={styles.appName}>Fire Shield</Text>
-            <Text style={styles.tagline}>Monitoramento de Incêndios Florestais</Text>
-          </View>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={16}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.logoArea}>
+          <MaterialCommunityIcons name="fire" size={72} color="#FF6B35" />
+          <Text style={styles.appName}>Fire Shield</Text>
+          <Text style={styles.tagline}>Monitoramento de Incêndios Florestais</Text>
+        </View>
 
-          <View style={styles.card}>
-            <View style={styles.tabRow}>
-              <TouchableOpacity
-                style={[styles.tab, mode === 'login' && styles.tabActive]}
-                onPress={() => setMode('login')}
-              >
-                <Text style={[styles.tabText, mode === 'login' && styles.tabTextActive]}>Entrar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.tab, mode === 'register' && styles.tabActive]}
-                onPress={() => setMode('register')}
-              >
-                <Text style={[styles.tabText, mode === 'register' && styles.tabTextActive]}>Cadastrar</Text>
-              </TouchableOpacity>
-            </View>
-
-            {mode === 'register' && (
-              <TextInput
-                style={styles.input}
-                placeholder="Nome completo"
-                placeholderTextColor="#999"
-                value={name}
-                onChangeText={setName}
-              />
-            )}
-
-            <TextInput
-              style={styles.input}
-              placeholder="E-mail"
-              placeholderTextColor="#999"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Senha"
-              placeholderTextColor="#999"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            {mode === 'register' && (
-              <View style={styles.row}>
-                <TextInput
-                  style={[styles.input, { flex: 1, marginRight: 8 }]}
-                  placeholder="Cidade (opcional)"
-                  placeholderTextColor="#999"
-                  value={city}
-                  onChangeText={setCity}
-                />
-                <TextInput
-                  style={[styles.input, { width: 70 }]}
-                  placeholder="UF"
-                  placeholderTextColor="#999"
-                  autoCapitalize="characters"
-                  maxLength={2}
-                  value={state}
-                  onChangeText={setState}
-                />
-              </View>
-            )}
-
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>
-                {mode === 'login' ? 'Entrar' : 'Criar Conta'}
-              </Text>
+        <View style={styles.card}>
+          <View style={styles.tabRow}>
+            <TouchableOpacity
+              style={[styles.tab, mode === 'login' && styles.tabActive]}
+              onPress={() => setMode('login')}
+            >
+              <Text style={[styles.tabText, mode === 'login' && styles.tabTextActive]}>Entrar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, mode === 'register' && styles.tabActive]}
+              onPress={() => setMode('register')}
+            >
+              <Text style={[styles.tabText, mode === 'register' && styles.tabTextActive]}>Cadastrar</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          {mode === 'register' && (
+            <TextInput
+              style={styles.input}
+              placeholder="Nome completo"
+              placeholderTextColor="#999"
+              returnKeyType="next"
+              value={name}
+              onChangeText={setName}
+            />
+          )}
+
+          <TextInput
+            style={styles.input}
+            placeholder="E-mail"
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="next"
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            placeholderTextColor="#999"
+            secureTextEntry
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit}
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          {mode === 'register' && (
+            <View style={styles.row}>
+              <TextInput
+                style={[styles.input, { flex: 1, marginRight: 8 }]}
+                placeholder="Cidade (opcional)"
+                placeholderTextColor="#999"
+                returnKeyType="next"
+                value={city}
+                onChangeText={setCity}
+              />
+              <TextInput
+                style={[styles.input, { width: 70 }]}
+                placeholder="UF"
+                placeholderTextColor="#999"
+                autoCapitalize="characters"
+                maxLength={2}
+                returnKeyType="done"
+                value={state}
+                onChangeText={setState}
+              />
+            </View>
+          )}
+
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>
+              {mode === 'login' ? 'Entrar' : 'Criar Conta'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
