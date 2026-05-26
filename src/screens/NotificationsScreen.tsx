@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { MOCK_NOTIFICATIONS } from '../data/mockData';
 import { Notification } from '../types';
 import EmptyState from '../components/EmptyState';
@@ -15,7 +16,6 @@ import { timeAgo } from '../utils/date';
 type Props = {
   onSelectOccurrence: (id: string) => void;
 };
-
 
 export default function NotificationsScreen({ onSelectOccurrence }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
@@ -78,7 +78,12 @@ export default function NotificationsScreen({ onSelectOccurrence }: Props) {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        ListEmptyComponent={<EmptyState icon="🔔" message="Nenhuma notificação" />}
+        ListEmptyComponent={
+          <EmptyState
+            icon={<Ionicons name="notifications-outline" size={48} color="#ccc" />}
+            message="Nenhuma notificação"
+          />
+        }
       />
     </SafeAreaView>
   );

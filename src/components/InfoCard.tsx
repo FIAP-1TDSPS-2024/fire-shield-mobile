@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 type Props = {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   value: string;
 };
@@ -10,7 +10,7 @@ type Props = {
 export default function InfoCard({ icon, label, value }: Props) {
   return (
     <View style={styles.card}>
-      <Text style={styles.icon}>{icon}</Text>
+      <View style={styles.iconWrapper}>{icon}</View>
       <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value}</Text>
     </View>
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 1 },
   },
-  icon: { fontSize: 24, marginBottom: 4 },
+  iconWrapper: { marginBottom: 6 },
   label: { fontSize: 12, color: '#888', marginBottom: 2 },
   value: { fontSize: 16, fontWeight: 'bold', color: '#222' },
 });

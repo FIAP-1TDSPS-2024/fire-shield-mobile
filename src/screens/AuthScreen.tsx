@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type Props = {
   onLogin: () => void;
@@ -37,7 +38,7 @@ export default function AuthScreen({ onLogin }: Props) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.logoArea}>
-            <Text style={styles.logo}>🔥</Text>
+            <MaterialCommunityIcons name="fire" size={72} color="#FF6B35" />
             <Text style={styles.appName}>Fire Shield</Text>
             <Text style={styles.tagline}>Monitoramento de Incêndios Florestais</Text>
           </View>
@@ -124,7 +125,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1a1a2e' },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   logoArea: { alignItems: 'center', marginBottom: 32 },
-  logo: { fontSize: 64 },
   appName: { fontSize: 28, fontWeight: 'bold', color: '#FF6B35', marginTop: 8 },
   tagline: { fontSize: 13, color: '#aaa', marginTop: 4, textAlign: 'center' },
   card: { backgroundColor: '#16213e', borderRadius: 16, padding: 24 },

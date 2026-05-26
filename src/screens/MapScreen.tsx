@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import MapView from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { MOCK_OCCURRENCES } from '../data/mockData';
 import { URGENCY_COLOR, URGENCY_LABEL } from '../constants/urgency';
 import { Occurrence, UrgencyLevel } from '../types';
@@ -52,7 +53,7 @@ export default function MapScreen({ onSelectOccurrence }: Props) {
 
       <SafeAreaView edges={['top']} style={styles.overlay}>
         <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search-outline" size={18} color="#999" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar ocorrência..."
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
-  searchIcon: { fontSize: 16, marginRight: 8 },
+  searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, paddingVertical: 12, fontSize: 15, color: '#333' },
   filterRow: { paddingBottom: 8, gap: 8 },
   filterChip: {

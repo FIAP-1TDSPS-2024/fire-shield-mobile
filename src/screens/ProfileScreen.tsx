@@ -9,12 +9,24 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import { MOCK_USER, MOCK_USER_REPORTS } from '../data/mockData';
+import { UserReport } from '../types';
 
 type Props = {
   onLogout: () => void;
 };
+
+function reportTypeIcon(type: UserReport['type']) {
+  if (type === 'Fogo de grande proporção') {
+    return <MaterialCommunityIcons name="fire" size={20} color="#E53935" />;
+  }
+  if (type === 'Fogo rasteiro') {
+    return <MaterialCommunityIcons name="fire" size={20} color="#FF8C00" />;
+  }
+  return <MaterialCommunityIcons name="weather-fog" size={20} color="#78909C" />;
+}
 
 export default function ProfileScreen({ onLogout }: Props) {
   const [name, setName] = useState(MOCK_USER.name);
@@ -54,12 +66,17 @@ export default function ProfileScreen({ onLogout }: Props) {
             style={styles.editBtn}
             onPress={editing ? handleSave : () => setEditing(true)}
           >
-            <Text style={styles.editBtnText}>{editing ? '💾  Salvar' : '✏️  Editar Perfil'}</Text>
+            <Ionicons
+              name={editing ? 'checkmark' : 'pencil-outline'}
+              size={14}
+              color="#fff"
+            />
+            <Text style={styles.editBtnText}>{editing ? 'Salvar' : 'Editar Perfil'}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🔔 Raio de Alertas</Text>
+          <Text style={styles.cardTitle}>Raio de Alertas</Text>
           <Text style={styles.radiusValue}>{Math.round(alertRadius)} km</Text>
           <Slider
             style={styles.slider}
@@ -82,16 +99,14 @@ export default function ProfileScreen({ onLogout }: Props) {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>📋 Meus Reportes</Text>
+          <Text style={styles.cardTitle}>Meus Reportes</Text>
           {MOCK_USER_REPORTS.length === 0 ? (
             <Text style={styles.emptyReports}>Nenhum reporte enviado ainda.</Text>
           ) : (
             MOCK_USER_REPORTS.map((report) => (
               <View key={report.id} style={styles.reportItem}>
-                <View style={styles.reportIcon}>
-                  <Text style={{ fontSize: 20 }}>
-                    {report.type === 'Fogo de grande proporção' ? '🔥' : report.type === 'Fogo rasteiro' ? '🌿' : '💨'}
-                  </Text>
+                <View style={styles.reportIconWrapper}>
+                  {reportTypeIcon(report.type)}
                 </View>
                 <View style={styles.reportInfo}>
                   <Text style={styles.reportType}>{report.type}</Text>
@@ -113,7 +128,7 @@ export default function ProfileScreen({ onLogout }: Props) {
             <Text style={styles.statLabel}>Reportes</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>🏅</Text>
+            <MaterialCommunityIcons name="medal" size={24} color="#FF6B35" />
             <Text style={styles.statLabel}>Colaborador</Text>
           </View>
           <View style={styles.statCard}>
@@ -123,6 +138,7 @@ export default function ProfileScreen({ onLogout }: Props) {
         </View>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={onLogout}>
+          <Ionicons name="log-out-outline" size={18} color="#E53935" />
           <Text style={styles.logoutText}>Sair da Conta</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -165,6 +181,9 @@ const styles = StyleSheet.create({
   profileEmail: { fontSize: 13, color: '#aaa', marginBottom: 2 },
   profileLocation: { fontSize: 13, color: '#888', marginBottom: 16 },
   editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: '#FF6B35',
     borderRadius: 8,
     paddingHorizontal: 20,
@@ -197,7 +216,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
     gap: 12,
   },
-  reportIcon: {
+  reportIconWrapper: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -216,19 +235,23 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
+    gap: 4,
     elevation: 1,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
   },
-  statValue: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e', marginBottom: 4 },
+  statValue: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e' },
   statLabel: { fontSize: 12, color: '#888' },
   logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#E53935',
     marginBottom: 20,

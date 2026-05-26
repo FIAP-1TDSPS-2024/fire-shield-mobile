@@ -11,9 +11,3 @@ export const URGENCY_LABEL: Record<UrgencyLevel, string> = {
   severe: 'Grave',
   critical: 'Crítico',
 };
-
-export const URGENCY_LABEL_WITH_ICON: Record<UrgencyLevel, string> = {
-  alert: '⚠️ Alerta',
-  severe: '🔶 Grave',
-  critical: '🔴 Crítico',
-};

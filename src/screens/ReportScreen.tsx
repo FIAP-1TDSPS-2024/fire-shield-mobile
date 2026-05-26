@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -68,7 +69,7 @@ export default function ReportScreen() {
   if (submitted) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]} edges={['top']}>
-        <Text style={styles.successIcon}>✅</Text>
+        <Ionicons name="checkmark-circle" size={72} color="#2E7D32" />
         <Text style={styles.successTitle}>Alerta Enviado!</Text>
         <Text style={styles.successSub}>Obrigado por contribuir com o monitoramento.</Text>
       </SafeAreaView>
@@ -82,7 +83,7 @@ export default function ReportScreen() {
         <Text style={styles.subtitle}>Ajude a comunidade registrando focos de incêndio.</Text>
 
         <View style={styles.locationBox}>
-          <Text style={styles.locationIcon}>📍</Text>
+          <Ionicons name="location-outline" size={20} color="#FF6B35" />
           {loadingLocation ? (
             <ActivityIndicator size="small" color="#FF6B35" />
           ) : location ? (
@@ -110,11 +111,11 @@ export default function ReportScreen() {
         <Text style={styles.label}>Foto (opcional)</Text>
         <View style={styles.mediaRow}>
           <TouchableOpacity style={styles.mediaBtn} onPress={() => pickImage('camera')}>
-            <Text style={styles.mediaIcon}>📷</Text>
+            <Ionicons name="camera-outline" size={28} color="#666" />
             <Text style={styles.mediaBtnText}>Câmera</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.mediaBtn} onPress={() => pickImage('library')}>
-            <Text style={styles.mediaIcon}>🖼️</Text>
+            <Ionicons name="images-outline" size={28} color="#666" />
             <Text style={styles.mediaBtnText}>Galeria</Text>
           </TouchableOpacity>
         </View>
@@ -122,7 +123,7 @@ export default function ReportScreen() {
           <View style={styles.imagePreviewContainer}>
             <Image source={{ uri: imageUri }} style={styles.imagePreview} />
             <TouchableOpacity style={styles.removeImage} onPress={() => setImageUri(null)}>
-              <Text style={styles.removeImageText}>✕</Text>
+              <Ionicons name="close" size={16} color="#fff" />
             </TouchableOpacity>
           </View>
         )}
@@ -139,7 +140,8 @@ export default function ReportScreen() {
         />
 
         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-          <Text style={styles.submitText}>🚨  Enviar Alerta</Text>
+          <MaterialCommunityIcons name="alarm-light" size={20} color="#fff" />
+          <Text style={styles.submitText}>Enviar Alerta</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -166,7 +168,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 1 },
   },
-  locationIcon: { fontSize: 20 },
   locationText: { fontSize: 13, color: '#555', fontFamily: 'monospace' },
   locationError: { fontSize: 13, color: '#E53935' },
   label: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 4 },
@@ -191,8 +192,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderStyle: 'dashed',
+    gap: 6,
   },
-  mediaIcon: { fontSize: 24, marginBottom: 4 },
   mediaBtnText: { fontSize: 13, color: '#666' },
   imagePreviewContainer: { position: 'relative', marginBottom: 16 },
   imagePreview: { width: '100%', height: 200, borderRadius: 12 },
@@ -207,7 +208,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  removeImageText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
   textarea: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -221,14 +221,16 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   submitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     backgroundColor: '#E53935',
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
     marginBottom: 20,
   },
   submitText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  successIcon: { fontSize: 64, marginBottom: 16 },
-  successTitle: { fontSize: 22, fontWeight: 'bold', color: '#1b5e20', marginBottom: 8 },
+  successTitle: { fontSize: 22, fontWeight: 'bold', color: '#1b5e20', marginTop: 16, marginBottom: 8 },
   successSub: { fontSize: 15, color: '#555', textAlign: 'center', paddingHorizontal: 32 },
 });
