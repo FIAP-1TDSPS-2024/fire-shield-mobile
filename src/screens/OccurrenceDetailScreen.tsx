@@ -7,34 +7,15 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Occurrence, UrgencyLevel } from '../types';
-
-const URGENCY_COLOR: Record<UrgencyLevel, string> = {
-  alert: '#FFC107',
-  severe: '#FF6B35',
-  critical: '#E53935',
-};
-
-const URGENCY_LABEL: Record<UrgencyLevel, string> = {
-  alert: '⚠️ Alerta',
-  severe: '🔶 Grave',
-  critical: '🔴 Crítico',
-};
+import { URGENCY_COLOR, URGENCY_LABEL_WITH_ICON } from '../constants/urgency';
+import InfoCard from '../components/InfoCard';
+import SectionTitle from '../components/SectionTitle';
+import { Occurrence } from '../types';
 
 type Props = {
   occurrence: Occurrence;
   onBack: () => void;
 };
-
-function InfoCard({ icon, label, value }: { icon: string; label: string; value: string }) {
-  return (
-    <View style={styles.infoCard}>
-      <Text style={styles.infoIcon}>{icon}</Text>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
-  );
-}
 
 export default function OccurrenceDetailScreen({ occurrence, onBack }: Props) {
   const color = URGENCY_COLOR[occurrence.urgency];
@@ -46,7 +27,7 @@ export default function OccurrenceDetailScreen({ occurrence, onBack }: Props) {
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
           <Text style={styles.backText}>← Voltar</Text>
         </TouchableOpacity>
-        <Text style={styles.urgencyBadge}>{URGENCY_LABEL[occurrence.urgency]}</Text>
+        <Text style={styles.urgencyBadge}>{URGENCY_LABEL_WITH_ICON[occurrence.urgency]}</Text>
         <Text style={styles.headerTitle}>{occurrence.title}</Text>
         <Text style={styles.headerSub}>Reportado em {date}</Text>
       </View>
@@ -54,7 +35,7 @@ export default function OccurrenceDetailScreen({ occurrence, onBack }: Props) {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.description}>{occurrence.description}</Text>
 
-        <Text style={styles.sectionTitle}>Informações Logísticas</Text>
+        <SectionTitle>Informações Logísticas</SectionTitle>
         <View style={styles.grid}>
           <InfoCard icon="📍" label="Distância" value={`${occurrence.distance} km`} />
           <InfoCard icon="🌲" label="Área Afetada" value={`${occurrence.area} ha`} />
@@ -76,7 +57,7 @@ export default function OccurrenceDetailScreen({ occurrence, onBack }: Props) {
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Condições Climáticas</Text>
+        <SectionTitle>Condições Climáticas</SectionTitle>
         <View style={styles.grid}>
           <InfoCard icon="🌡️" label="Temperatura" value={`${occurrence.weather.temperature}°C`} />
           <InfoCard icon="💧" label="Umidade" value={`${occurrence.weather.humidity}%`} />
@@ -84,7 +65,7 @@ export default function OccurrenceDetailScreen({ occurrence, onBack }: Props) {
           <InfoCard icon="🧭" label="Direção" value={occurrence.weather.windDirection} />
         </View>
 
-        <Text style={styles.sectionTitle}>Reportado por</Text>
+        <SectionTitle>Reportado por</SectionTitle>
         <View style={styles.reporterRow}>
           <Text style={styles.reporterAvatar}>👤</Text>
           <Text style={styles.reporterName}>{occurrence.reportedBy}</Text>
@@ -104,24 +85,7 @@ const styles = StyleSheet.create({
   headerSub: { color: '#ffffffaa', fontSize: 13, marginTop: 4 },
   scroll: { padding: 16 },
   description: { fontSize: 15, color: '#444', lineHeight: 22, marginBottom: 20 },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#222', marginBottom: 12, marginTop: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
-  infoCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-  },
-  infoIcon: { fontSize: 24, marginBottom: 4 },
-  infoLabel: { fontSize: 12, color: '#888', marginBottom: 2 },
-  infoValue: { fontSize: 16, fontWeight: 'bold', color: '#222' },
   dispatchBanner: {
     flexDirection: 'row',
     alignItems: 'center',

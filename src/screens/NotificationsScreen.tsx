@@ -9,18 +9,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MOCK_NOTIFICATIONS } from '../data/mockData';
 import { Notification } from '../types';
+import EmptyState from '../components/EmptyState';
+import { timeAgo } from '../utils/date';
 
 type Props = {
   onSelectOccurrence: (id: string) => void;
 };
 
-function timeAgo(iso: string): string {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return 'agora';
-  if (diff < 3600) return `${Math.floor(diff / 60)}min atrás`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
-  return `${Math.floor(diff / 86400)}d atrás`;
-}
 
 export default function NotificationsScreen({ onSelectOccurrence }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
@@ -83,12 +78,7 @@ export default function NotificationsScreen({ onSelectOccurrence }: Props) {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🔔</Text>
-            <Text style={styles.emptyText}>Nenhuma notificação</Text>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState icon="🔔" message="Nenhuma notificação" />}
       />
     </SafeAreaView>
   );
@@ -146,7 +136,4 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   unreadBadgeText: { fontSize: 11, color: '#E53935', fontWeight: 'bold' },
-  empty: { alignItems: 'center', paddingTop: 80 },
-  emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 16, color: '#999' },
 });

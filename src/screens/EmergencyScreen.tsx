@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SAFE_SHELTERS } from "../data/mockData";
+import SectionTitle from "../components/SectionTitle";
 
 const SURVIVAL_TIPS = [
   {
@@ -39,7 +39,7 @@ export default function EmergencyScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.alertBanner}>
           <Text style={styles.alertIcon}>🚨</Text>
@@ -76,29 +76,13 @@ export default function EmergencyScreen() {
           </View>
         </TouchableOpacity>
 
-        <Text style={styles.sectionTitle}>Guia de Sobrevivência</Text>
+        <SectionTitle>Guia de Sobrevivência</SectionTitle>
         {SURVIVAL_TIPS.map((tip, i) => (
           <View key={i} style={styles.tipCard}>
             <Text style={styles.tipIcon}>{tip.icon}</Text>
             <View style={styles.tipContent}>
               <Text style={styles.tipTitle}>{tip.title}</Text>
               <Text style={styles.tipBody}>{tip.body}</Text>
-            </View>
-          </View>
-        ))}
-
-        <Text style={styles.sectionTitle}>Abrigos Próximos</Text>
-        {SAFE_SHELTERS.map((shelter) => (
-          <View key={shelter.id} style={styles.shelterCard}>
-            <View style={styles.shelterLeft}>
-              <Text style={styles.shelterIcon}>🏠</Text>
-            </View>
-            <View style={styles.shelterInfo}>
-              <Text style={styles.shelterName}>{shelter.name}</Text>
-              <Text style={styles.shelterAddress}>{shelter.address}</Text>
-            </View>
-            <View style={styles.shelterDistance}>
-              <Text style={styles.shelterDistanceText}>{shelter.distance}</Text>
             </View>
           </View>
         ))}
@@ -157,12 +141,6 @@ const styles = StyleSheet.create({
   samuIcon: { fontSize: 28 },
   samuNumber: { fontSize: 18, fontWeight: "bold", color: "#fff" },
   samuSub: { fontSize: 12, color: "#ffffffcc" },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#222",
-    marginBottom: 12,
-  },
   tipCard: {
     flexDirection: "row",
     backgroundColor: "#fff",

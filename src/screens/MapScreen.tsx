@@ -7,22 +7,12 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-import MapView, { Marker, Circle } from 'react-native-maps';
+import MapView from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MOCK_OCCURRENCES } from '../data/mockData';
+import { URGENCY_COLOR, URGENCY_LABEL } from '../constants/urgency';
 import { Occurrence, UrgencyLevel } from '../types';
-
-const URGENCY_COLOR: Record<UrgencyLevel, string> = {
-  alert: '#FFC107',
-  severe: '#FF6B35',
-  critical: '#E53935',
-};
-
-const URGENCY_LABEL: Record<UrgencyLevel, string> = {
-  alert: 'Alerta',
-  severe: 'Grave',
-  critical: 'Crítico',
-};
+import OccurrenceMapMarker from '../components/OccurrenceMapMarker';
 
 type Filter = 'all' | UrgencyLevel;
 
@@ -52,22 +42,11 @@ export default function MapScreen({ onSelectOccurrence }: Props) {
         }}
       >
         {filtered.map((occurrence) => (
-          <React.Fragment key={occurrence.id}>
-            <Circle
-              center={{ latitude: occurrence.latitude, longitude: occurrence.longitude }}
-              radius={occurrence.area * 50}
-              fillColor={URGENCY_COLOR[occurrence.urgency] + '33'}
-              strokeColor={URGENCY_COLOR[occurrence.urgency]}
-              strokeWidth={1}
-            />
-            <Marker
-              coordinate={{ latitude: occurrence.latitude, longitude: occurrence.longitude }}
-              pinColor={URGENCY_COLOR[occurrence.urgency]}
-              onPress={() => onSelectOccurrence(occurrence)}
-              title={occurrence.title}
-              description={URGENCY_LABEL[occurrence.urgency]}
-            />
-          </React.Fragment>
+          <OccurrenceMapMarker
+            key={occurrence.id}
+            occurrence={occurrence}
+            onPress={onSelectOccurrence}
+          />
         ))}
       </MapView>
 
