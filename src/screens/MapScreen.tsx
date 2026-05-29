@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   ScrollView,
 } from 'react-native';
 import MapView from 'react-native-maps';
+import * as Location from 'expo-location';
+import { requestLocationPermission } from '../utils/location';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { MOCK_OCCURRENCES } from '../data/mockData';
@@ -24,6 +26,21 @@ type Props = {
 export default function MapScreen({ onSelectOccurrence }: Props) {
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
+  const mapRef = useRef<MapView>(null);
+
+  useEffect(() => {
+    (async () => {
+      const granted = await requestLocationPermission();
+      if (!granted) return;
+      const loc = await Location.getCurrentPositionAsync({});
+      mapRef.current?.animateToRegion({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: 0.1,
+        longitudeDelta: 0.1,
+      }, 800);
+    })();
+  }, []);
 
   const filtered = MOCK_OCCURRENCES.filter((o) => {
     const matchesFilter = filter === 'all' || o.urgency === filter;
@@ -34,6 +51,7 @@ export default function MapScreen({ onSelectOccurrence }: Props) {
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         initialRegion={{
           latitude: -15.7901,

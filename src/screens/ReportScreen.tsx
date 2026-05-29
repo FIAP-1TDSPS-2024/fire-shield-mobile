@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -14,6 +15,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
+import { requestLocationPermission } from "../utils/location";
 
 const TYPES = [
   "Fumaça suspeita",
@@ -32,18 +34,22 @@ export default function ReportScreen() {
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+  useFocusEffect(
+    useCallback(() => {
+      setLocation(null);
+      setLoadingLocation(true);
+      (async () => {
+        const granted = await requestLocationPermission();
+        if (!granted) {
+          setLoadingLocation(false);
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync({});
+        setLocation({ lat: loc.coords.latitude, lon: loc.coords.longitude });
         setLoadingLocation(false);
-        return;
-      }
-      const loc = await Location.getCurrentPositionAsync({});
-      setLocation({ lat: loc.coords.latitude, lon: loc.coords.longitude });
-      setLoadingLocation(false);
-    })();
-  }, []);
+      })();
+    }, []),
+  );
 
   const pickImage = async (source: "camera" | "library") => {
     const fn =
