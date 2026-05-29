@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { login, registrar, setToken } from "../services/api";
 
 type Props = {
   onLogin: () => void;
@@ -20,15 +22,32 @@ export default function AuthScreen({ onLogin }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email || !password) {
       Alert.alert("Atenção", "Preencha e-mail e senha.");
       return;
     }
-    onLogin();
+    if (mode === "register" && !name) {
+      Alert.alert("Atenção", "Preencha o nome completo.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (mode === "register") {
+        await registrar(name, email, password);
+      }
+
+      const res = await login(email, password);
+      setToken(res.token);
+      onLogin();
+    } catch (e: any) {
+      Alert.alert("Erro", e.message ?? "Credenciais inválidas. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -112,10 +131,18 @@ export default function AuthScreen({ onLogin }: Props) {
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>
-              {mode === "login" ? "Entrar" : "Criar Conta"}
-            </Text>
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>
+                {mode === "login" ? "Entrar" : "Criar Conta"}
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
@@ -150,7 +177,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 15,
   },
-  row: { flexDirection: "row" },
   button: {
     backgroundColor: "#FF6B35",
     borderRadius: 10,
@@ -158,5 +184,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
+  buttonDisabled: { opacity: 0.6 },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });

@@ -7,15 +7,14 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  Image,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import * as ImagePicker from "expo-image-picker";
 import { requestLocationPermission } from "../utils/location";
+import { criarOcorrencia } from "../services/api";
 
 const TYPES = [
   "Fumaça suspeita",
@@ -24,14 +23,32 @@ const TYPES = [
 ] as const;
 type ReportType = (typeof TYPES)[number];
 
+const TYPE_TO_URGENCY: Record<ReportType, string> = {
+  "Fumaça suspeita": "alert",
+  "Fogo rasteiro": "alert",
+  "Fogo de grande proporção": "critical",
+};
+
+const TYPE_TO_AREA: Record<ReportType, number> = {
+  "Fumaça suspeita": 0,
+  "Fogo rasteiro": 5,
+  "Fogo de grande proporção": 20,
+};
+
+const TYPE_TO_DISTANCE: Record<ReportType, number> = {
+  "Fumaça suspeita": 0,
+  "Fogo rasteiro": 1,
+  "Fogo de grande proporção": 5,
+};
+
 export default function ReportScreen() {
   const [selectedType, setSelectedType] = useState<ReportType | null>(null);
   const [description, setDescription] = useState("");
-  const [imageUri, setImageUri] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
     null,
   );
   const [loadingLocation, setLoadingLocation] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   useFocusEffect(
@@ -51,22 +68,7 @@ export default function ReportScreen() {
     }, []),
   );
 
-  const pickImage = async (source: "camera" | "library") => {
-    const fn =
-      source === "camera"
-        ? ImagePicker.launchCameraAsync
-        : ImagePicker.launchImageLibraryAsync;
-    const result = await fn({
-      mediaTypes: "images",
-      allowsEditing: true,
-      quality: 0.7,
-    });
-    if (!result.canceled && result.assets.length > 0) {
-      setImageUri(result.assets[0].uri);
-    }
-  };
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedType) {
       Alert.alert("Atenção", "Selecione o tipo de ocorrência.");
       return;
@@ -75,11 +77,27 @@ export default function ReportScreen() {
       Alert.alert("Atenção", "Aguardando localização GPS.");
       return;
     }
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
-    setSelectedType(null);
-    setDescription("");
-    setImageUri(null);
+
+    setSubmitting(true);
+    try {
+      await criarOcorrencia({
+        latitude: location.lat,
+        longitude: location.lon,
+        tipoOcorrencia: selectedType,
+        detalhesAdicionais: description,
+        urgencia: TYPE_TO_URGENCY[selectedType],
+        area: TYPE_TO_AREA[selectedType],
+        distancia: TYPE_TO_DISTANCE[selectedType],
+      });
+      setSubmitted(true);
+      setSelectedType(null);
+      setDescription("");
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch (e: any) {
+      Alert.alert("Erro", e.message ?? "Não foi possível enviar o alerta.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -159,9 +177,23 @@ export default function ReportScreen() {
           onChangeText={setDescription}
         />
 
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-          <MaterialCommunityIcons name="alarm-light" size={20} color="#fff" />
-          <Text style={styles.submitText}>Enviar Alerta</Text>
+        <TouchableOpacity
+          style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
+          onPress={handleSubmit}
+          disabled={submitting}
+        >
+          {submitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <MaterialCommunityIcons
+                name="alarm-light"
+                size={20}
+                color="#fff"
+              />
+              <Text style={styles.submitText}>Enviar Alerta</Text>
+            </>
+          )}
         </TouchableOpacity>
       </KeyboardAwareScrollView>
     </SafeAreaView>
@@ -213,32 +245,6 @@ const styles = StyleSheet.create({
   typeBtnActive: { borderColor: "#FF6B35", backgroundColor: "#fff4f0" },
   typeText: { fontSize: 14, color: "#555", fontWeight: "500" },
   typeTextActive: { color: "#FF6B35", fontWeight: "bold" },
-  mediaRow: { flexDirection: "row", gap: 12, marginBottom: 12 },
-  mediaBtn: {
-    flex: 1,
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderStyle: "dashed",
-    gap: 6,
-  },
-  mediaBtnText: { fontSize: 13, color: "#666" },
-  imagePreviewContainer: { position: "relative", marginBottom: 16 },
-  imagePreview: { width: "100%", height: 200, borderRadius: 12 },
-  removeImage: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "#000000aa",
-    borderRadius: 14,
-    width: 28,
-    height: 28,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   textarea: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -261,6 +267,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
   },
+  submitBtnDisabled: { opacity: 0.6 },
   submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
   successTitle: {
     fontSize: 22,

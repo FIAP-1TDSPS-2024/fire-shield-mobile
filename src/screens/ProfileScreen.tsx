@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,37 +6,68 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
-import { MOCK_USER, MOCK_USER_REPORTS } from '../data/mockData';
-import { UserReport } from '../types';
+import { getMeuPerfil, editarPerfil } from '../services/api';
+import { User } from '../types';
 
 type Props = {
+  user: User;
   onLogout: () => void;
 };
 
-function reportTypeIcon(type: UserReport['type']) {
-  if (type === 'Fogo de grande proporção') {
-    return <MaterialCommunityIcons name="fire" size={20} color="#E53935" />;
-  }
-  if (type === 'Fogo rasteiro') {
-    return <MaterialCommunityIcons name="fire" size={20} color="#FF8C00" />;
-  }
-  return <MaterialCommunityIcons name="weather-fog" size={20} color="#78909C" />;
-}
-
-export default function ProfileScreen({ onLogout }: Props) {
-  const [name, setName] = useState(MOCK_USER.name);
+export default function ProfileScreen({ user: initialUser, onLogout }: Props) {
+  const [nome, setNome] = useState(initialUser.nome);
+  const [localidade, setLocalidade] = useState(initialUser.localidade ?? '');
+  const [email, setEmail] = useState(initialUser.email);
+  const [alertRadius, setAlertRadius] = useState(initialUser.raioAlertasKm || 30);
   const [editing, setEditing] = useState(false);
-  const [alertRadius, setAlertRadius] = useState(MOCK_USER.alertRadiusKm);
+  const [saving, setSaving] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
-  const handleSave = () => {
-    setEditing(false);
-    Alert.alert('Salvo', 'Dados atualizados com sucesso.');
+  useEffect(() => {
+    getMeuPerfil()
+      .then((perfil) => {
+        setNome(perfil.nome);
+        setEmail(perfil.email);
+        setLocalidade(perfil.localidade ?? '');
+        setAlertRadius(perfil.raioAlertasKm);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingProfile(false));
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await editarPerfil(nome, localidade, alertRadius);
+      setEditing(false);
+      Alert.alert('Salvo', 'Dados atualizados com sucesso.');
+    } catch (e: any) {
+      Alert.alert('Erro', e.message ?? 'Não foi possível salvar.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const initials = nome
+    .split(' ')
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('');
+
+  if (loadingProfile) {
+    return (
+      <SafeAreaView style={[styles.container, styles.center]} edges={['top']}>
+        <ActivityIndicator size="large" color="#FF6B35" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -49,33 +80,53 @@ export default function ProfileScreen({ onLogout }: Props) {
       >
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
-            </Text>
+            <Text style={styles.avatarText}>{initials}</Text>
           </View>
+
           {editing ? (
-            <TextInput
-              style={styles.nameInput}
-              value={name}
-              onChangeText={setName}
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={handleSave}
-            />
+            <>
+              <TextInput
+                style={styles.nameInput}
+                value={nome}
+                onChangeText={setNome}
+                autoFocus
+                returnKeyType="next"
+                placeholder="Nome"
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.nameInput}
+                value={localidade}
+                onChangeText={setLocalidade}
+                returnKeyType="done"
+                placeholder="Localidade (ex: São Paulo, SP)"
+                placeholderTextColor="#aaa"
+              />
+            </>
           ) : (
-            <Text style={styles.profileName}>{name}</Text>
+            <>
+              <Text style={styles.profileName}>{nome}</Text>
+              {localidade ? (
+                <Text style={styles.profileLocation}>{localidade}</Text>
+              ) : null}
+            </>
           )}
-          <Text style={styles.profileEmail}>{MOCK_USER.email}</Text>
-          <Text style={styles.profileLocation}>
-            {MOCK_USER.city}, {MOCK_USER.state}
-          </Text>
+
+          <Text style={styles.profileEmail}>{email}</Text>
 
           <TouchableOpacity
-            style={styles.editBtn}
+            style={[styles.editBtn, saving && styles.editBtnDisabled]}
             onPress={editing ? handleSave : () => setEditing(true)}
+            disabled={saving}
           >
-            <Ionicons name={editing ? 'checkmark' : 'pencil-outline'} size={14} color="#fff" />
-            <Text style={styles.editBtnText}>{editing ? 'Salvar' : 'Editar Perfil'}</Text>
+            {saving ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Ionicons name={editing ? 'checkmark' : 'pencil-outline'} size={14} color="#fff" />
+                <Text style={styles.editBtnText}>{editing ? 'Salvar' : 'Editar Perfil'}</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -102,42 +153,10 @@ export default function ProfileScreen({ onLogout }: Props) {
           </Text>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Meus Reportes</Text>
-          {MOCK_USER_REPORTS.length === 0 ? (
-            <Text style={styles.emptyReports}>Nenhum reporte enviado ainda.</Text>
-          ) : (
-            MOCK_USER_REPORTS.map((report) => (
-              <View key={report.id} style={styles.reportItem}>
-                <View style={styles.reportIconWrapper}>
-                  {reportTypeIcon(report.type)}
-                </View>
-                <View style={styles.reportInfo}>
-                  <Text style={styles.reportType}>{report.type}</Text>
-                  <Text style={styles.reportDate}>
-                    {new Date(report.reportedAt).toLocaleDateString('pt-BR')}
-                  </Text>
-                  {report.description ? (
-                    <Text style={styles.reportDesc} numberOfLines={1}>{report.description}</Text>
-                  ) : null}
-                </View>
-              </View>
-            ))
-          )}
-        </View>
-
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{MOCK_USER_REPORTS.length}</Text>
-            <Text style={styles.statLabel}>Reportes</Text>
-          </View>
           <View style={styles.statCard}>
             <MaterialCommunityIcons name="medal" size={24} color="#FF6B35" />
             <Text style={styles.statLabel}>Colaborador</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>Dias ativo</Text>
           </View>
         </View>
 
@@ -152,6 +171,7 @@ export default function ProfileScreen({ onLogout }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
+  center: { alignItems: 'center', justifyContent: 'center' },
   scroll: { padding: 16, paddingBottom: 40 },
   profileHeader: {
     backgroundColor: '#1a1a2e',
@@ -172,18 +192,18 @@ const styles = StyleSheet.create({
   avatarText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   profileName: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
   nameInput: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#FF6B35',
-    marginBottom: 4,
+    marginBottom: 8,
     paddingHorizontal: 8,
     textAlign: 'center',
-    minWidth: 180,
+    minWidth: 200,
   },
   profileEmail: { fontSize: 13, color: '#aaa', marginBottom: 2 },
-  profileLocation: { fontSize: 13, color: '#888', marginBottom: 16 },
+  profileLocation: { fontSize: 13, color: '#888', marginBottom: 4 },
   editBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -192,7 +212,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 8,
+    marginTop: 12,
   },
+  editBtnDisabled: { opacity: 0.6 },
   editBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   card: {
     backgroundColor: '#fff',
@@ -211,27 +233,6 @@ const styles = StyleSheet.create({
   sliderLabels: { flexDirection: 'row', justifyContent: 'space-between' },
   sliderLabel: { fontSize: 11, color: '#aaa' },
   radiusHint: { fontSize: 12, color: '#777', textAlign: 'center', marginTop: 8 },
-  emptyReports: { fontSize: 14, color: '#aaa', textAlign: 'center', padding: 8 },
-  reportItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    gap: 12,
-  },
-  reportIconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFF4F0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reportInfo: { flex: 1 },
-  reportType: { fontSize: 14, fontWeight: '600', color: '#333' },
-  reportDate: { fontSize: 12, color: '#888', marginTop: 2 },
-  reportDesc: { fontSize: 12, color: '#aaa', marginTop: 1 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   statCard: {
     flex: 1,
@@ -246,7 +247,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
   },
-  statValue: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e' },
   statLabel: { fontSize: 12, color: '#888' },
   logoutBtn: {
     flexDirection: 'row',

@@ -12,7 +12,6 @@ import * as Location from 'expo-location';
 import { requestLocationPermission } from '../utils/location';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { MOCK_OCCURRENCES } from '../data/mockData';
 import { URGENCY_COLOR, URGENCY_LABEL } from '../constants/urgency';
 import { Occurrence, UrgencyLevel } from '../types';
 import OccurrenceMapMarker from '../components/OccurrenceMapMarker';
@@ -20,10 +19,11 @@ import OccurrenceMapMarker from '../components/OccurrenceMapMarker';
 type Filter = 'all' | UrgencyLevel;
 
 type Props = {
+  occurrences: Occurrence[];
   onSelectOccurrence: (occurrence: Occurrence) => void;
 };
 
-export default function MapScreen({ onSelectOccurrence }: Props) {
+export default function MapScreen({ occurrences, onSelectOccurrence }: Props) {
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
   const mapRef = useRef<MapView>(null);
@@ -42,7 +42,7 @@ export default function MapScreen({ onSelectOccurrence }: Props) {
     })();
   }, []);
 
-  const filtered = MOCK_OCCURRENCES.filter((o) => {
+  const filtered = occurrences.filter((o) => {
     const matchesFilter = filter === 'all' || o.urgency === filter;
     const matchesSearch = o.title.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;

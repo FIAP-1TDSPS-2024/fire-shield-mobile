@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AuthScreen from '../screens/AuthScreen';
 import MapScreen from '../screens/MapScreen';
@@ -12,19 +11,30 @@ import ReportScreen from '../screens/ReportScreen';
 import EmergencyScreen from '../screens/EmergencyScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import { MOCK_OCCURRENCES, MOCK_NOTIFICATIONS } from '../data/mockData';
+import { clearToken, getOcorrencias, getMeuPerfil } from '../services/api';
+import { Occurrence, UrgencyLevel, User } from '../types';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+
+const VALID_URGENCY = new Set<string>(['alert', 'severe', 'critical']);
+function toUrgency(value: string): UrgencyLevel {
+  return VALID_URGENCY.has(value) ? (value as UrgencyLevel) : 'alert';
+}
 
 function MainTabs({
+  occurrences,
+  user,
   onSelectOccurrence,
   onLogout,
   unreadCount,
+  onUnreadCountChange,
 }: {
+  occurrences: Occurrence[];
+  user: User;
   onSelectOccurrence: (id: string) => void;
   onLogout: () => void;
   unreadCount: number;
+  onUnreadCountChange: (count: number) => void;
 }) {
   const insets = useSafeAreaInsets();
   return (
@@ -45,7 +55,12 @@ function MainTabs({
           ),
         }}
       >
-        {() => <MapScreen onSelectOccurrence={(o) => onSelectOccurrence(o.id)} />}
+        {() => (
+          <MapScreen
+            occurrences={occurrences}
+            onSelectOccurrence={(o) => onSelectOccurrence(o.id)}
+          />
+        )}
       </Tab.Screen>
 
       <Tab.Screen
@@ -82,7 +97,12 @@ function MainTabs({
           tabBarBadgeStyle: { backgroundColor: '#E53935' },
         }}
       >
-        {() => <NotificationsScreen onSelectOccurrence={onSelectOccurrence} />}
+        {() => (
+          <NotificationsScreen
+            onSelectOccurrence={onSelectOccurrence}
+            onUnreadCountChange={onUnreadCountChange}
+          />
+        )}
       </Tab.Screen>
 
       <Tab.Screen
@@ -93,7 +113,7 @@ function MainTabs({
           ),
         }}
       >
-        {() => <ProfileScreen onLogout={onLogout} />}
+        {() => <ProfileScreen user={user} onLogout={onLogout} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
@@ -102,17 +122,59 @@ function MainTabs({
 export default function AppNavigator() {
   const [authenticated, setAuthenticated] = useState(false);
   const [selectedOccurrenceId, setSelectedOccurrenceId] = useState<string | null>(null);
+  const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
+  const [user, setUser] = useState<User>({ nome: '', email: '', raioAlertasKm: 30 });
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const unreadCount = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
+  useEffect(() => {
+    if (!authenticated) return;
+
+    getMeuPerfil()
+      .then(setUser)
+      .catch(() => {});
+
+    getOcorrencias()
+      .then((items) =>
+        setOccurrences(
+          items.map((o) => ({
+            id: o.id,
+            latitude: o.latitude,
+            longitude: o.longitude,
+            urgency: toUrgency(o.urgency),
+            title: o.title,
+            description: o.description,
+            reportedAt: o.reportedAt,
+            area: o.area,
+            distance: o.distance,
+            firefightersDispatched: o.firefightersDispatched,
+            reportedBy: o.reportedBy,
+          }))
+        )
+      )
+      .catch(() => {});
+  }, [authenticated]);
+
+  const handleLogin = () => {
+    setAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    clearToken();
+    setAuthenticated(false);
+    setUser({ nome: '', email: '', raioAlertasKm: 30 });
+    setOccurrences([]);
+    setUnreadCount(0);
+    setSelectedOccurrenceId(null);
+  };
 
   const selectedOccurrence = selectedOccurrenceId
-    ? MOCK_OCCURRENCES.find((o) => o.id === selectedOccurrenceId)
+    ? occurrences.find((o) => o.id === selectedOccurrenceId) ?? null
     : null;
 
   if (!authenticated) {
     return (
       <NavigationContainer>
-        <AuthScreen onLogin={() => setAuthenticated(true)} />
+        <AuthScreen onLogin={handleLogin} />
       </NavigationContainer>
     );
   }
@@ -131,9 +193,12 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <MainTabs
+        occurrences={occurrences}
+        user={user}
         onSelectOccurrence={setSelectedOccurrenceId}
-        onLogout={() => setAuthenticated(false)}
+        onLogout={handleLogout}
         unreadCount={unreadCount}
+        onUnreadCountChange={setUnreadCount}
       />
     </NavigationContainer>
   );

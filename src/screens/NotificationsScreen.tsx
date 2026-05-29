@@ -1,33 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { MOCK_NOTIFICATIONS } from '../data/mockData';
+import * as Location from 'expo-location';
+import { requestLocationPermission } from '../utils/location';
+import { getNotificacoes } from '../services/api';
 import { Notification } from '../types';
 import EmptyState from '../components/EmptyState';
-import { timeAgo } from '../utils/date';
 
 type Props = {
   onSelectOccurrence: (id: string) => void;
+  onUnreadCountChange: (count: number) => void;
 };
 
-export default function NotificationsScreen({ onSelectOccurrence }: Props) {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+export default function NotificationsScreen({ onSelectOccurrence, onUnreadCountChange }: Props) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true);
+    try {
+      const granted = await requestLocationPermission();
+      let lat = -15.7901;
+      let lon = -47.9192;
+
+      if (granted) {
+        const loc = await Location.getCurrentPositionAsync({});
+        lat = loc.coords.latitude;
+        lon = loc.coords.longitude;
+      }
+
+      const items = await getNotificacoes(lat, lon);
+      const mapped: Notification[] = items.map((item, index) => ({
+        id: `${item.idOcorrencia}-${index}`,
+        occurrenceId: item.idOcorrencia,
+        title: item.titulo,
+        body: item.mensagem,
+        receivedAt: new Date().toISOString(),
+        read: item.lida,
+        tempoAtras: item.tempoAtras,
+      }));
+      setNotifications(mapped);
+      onUnreadCountChange(mapped.filter((n) => !n.read).length);
+    } catch {
+      // mantém lista atual em caso de erro
+    } finally {
+      setLoading(false);
+    }
+  }, [onUnreadCountChange]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotifications();
+    }, [fetchNotifications]),
+  );
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAllRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllRead = () => {
+    const updated = notifications.map((n) => ({ ...n, read: true }));
+    setNotifications(updated);
+    onUnreadCountChange(0);
+  };
 
   const handlePress = (notification: Notification) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+    );
+    onUnreadCountChange(
+      notifications.filter((n) => !n.read && n.id !== notification.id).length
     );
     onSelectOccurrence(notification.occurrenceId);
   };
@@ -44,7 +93,7 @@ export default function NotificationsScreen({ onSelectOccurrence }: Props) {
           <Text style={[styles.itemTitle, !item.read && styles.itemTitleUnread]} numberOfLines={1}>
             {item.title}
           </Text>
-          <Text style={styles.itemTime}>{timeAgo(item.receivedAt)}</Text>
+          <Text style={styles.itemTime}>{item.tempoAtras ?? ''}</Text>
         </View>
         <Text style={styles.itemBody} numberOfLines={2}>{item.body}</Text>
         {!item.read && (
@@ -72,19 +121,25 @@ export default function NotificationsScreen({ onSelectOccurrence }: Props) {
         )}
       </View>
 
-      <FlatList
-        data={notifications}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        ListEmptyComponent={
-          <EmptyState
-            icon={<Ionicons name="notifications-outline" size={48} color="#ccc" />}
-            message="Nenhuma notificação"
-          />
-        }
-      />
+      {loading && notifications.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B35" />
+        </View>
+      ) : (
+        <FlatList
+          data={notifications}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          ListEmptyComponent={
+            <EmptyState
+              icon={<Ionicons name="notifications-outline" size={48} color="#ccc" />}
+              message="Nenhuma notificação"
+            />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -111,6 +166,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   markAllText: { fontSize: 12, color: '#666' },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   list: { paddingHorizontal: 16, paddingBottom: 20 },
   item: {
     flexDirection: 'row',

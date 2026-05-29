@@ -1,4 +1,4 @@
-export type UrgencyLevel = 'alert' | 'severe' | 'critical';
+export type UrgencyLevel = "alert" | "severe" | "critical";
 
 export interface Occurrence {
   id: string;
@@ -8,15 +8,9 @@ export interface Occurrence {
   title: string;
   description: string;
   reportedAt: string;
-  area: number; // hectares
-  distance: number; // km from user
+  area: number;
+  distance: number;
   firefightersDispatched: boolean;
-  weather: {
-    temperature: number;
-    humidity: number;
-    windSpeed: number;
-    windDirection: string;
-  };
   reportedBy: string;
 }
 
@@ -27,11 +21,12 @@ export interface Notification {
   body: string;
   receivedAt: string;
   read: boolean;
+  tempoAtras?: string;
 }
 
 export interface UserReport {
   id: string;
-  type: 'Fumaça suspeita' | 'Fogo rasteiro' | 'Fogo de grande proporção';
+  type: "Fumaça suspeita" | "Fogo rasteiro" | "Fogo de grande proporção";
   latitude: number;
   longitude: number;
   description: string;
@@ -40,11 +35,8 @@ export interface UserReport {
 }
 
 export interface User {
-  id: string;
-  name: string;
+  nome: string;
   email: string;
-  city: string;
-  state: string;
-  alertRadiusKm: number;
-  avatarUri?: string;
+  localidade?: string;
+  raioAlertasKm: number;
 }
