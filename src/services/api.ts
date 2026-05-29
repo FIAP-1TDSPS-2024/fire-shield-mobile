@@ -21,7 +21,13 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const text = await response.text().catch(() => '');
-    throw new Error(text || `Erro ${response.status}`);
+    try {
+      const json = JSON.parse(text);
+      throw new Error(json.message || `Erro ${response.status}`);
+    } catch (e) {
+      if (e instanceof SyntaxError) throw new Error(text || `Erro ${response.status}`);
+      throw e;
+    }
   }
 
   const text = await response.text();
