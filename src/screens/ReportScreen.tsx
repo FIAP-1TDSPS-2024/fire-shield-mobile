@@ -14,7 +14,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { requestLocationPermission } from "../utils/location";
-import { criarOcorrencia } from "../services/api";
+import { criarOcorrencia } from "../services/occurence";
 
 const TYPES = [
   "Fumaça suspeita",

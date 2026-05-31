@@ -11,7 +11,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { login, registrar, setToken } from "../services/api";
+import { login, registrar } from "../services/auth";
+import { setToken } from "../services/api";
 
 type Props = {
   onLogin: () => void;
@@ -44,7 +45,10 @@ export default function AuthScreen({ onLogin }: Props) {
       setToken(res.token);
       onLogin();
     } catch (e: any) {
-      Alert.alert("Erro", e.message ?? "Credenciais inválidas. Tente novamente.");
+      Alert.alert(
+        "Erro",
+        e.message ?? "Credenciais inválidas. Tente novamente.",
+      );
     } finally {
       setLoading(false);
     }

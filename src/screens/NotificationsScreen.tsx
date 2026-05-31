@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,22 +6,25 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
-import { requestLocationPermission } from '../utils/location';
-import { getNotificacoes } from '../services/api';
-import { Notification } from '../types';
-import EmptyState from '../components/EmptyState';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import { requestLocationPermission } from "../utils/location";
+import { getNotificacoes } from "../services/notification";
+import { Notification } from "../types";
+import EmptyState from "../components/EmptyState";
 
 type Props = {
   onSelectOccurrence: (id: string) => void;
   onUnreadCountChange: (count: number) => void;
 };
 
-export default function NotificationsScreen({ onSelectOccurrence, onUnreadCountChange }: Props) {
+export default function NotificationsScreen({
+  onSelectOccurrence,
+  onUnreadCountChange,
+}: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -73,10 +76,10 @@ export default function NotificationsScreen({ onSelectOccurrence, onUnreadCountC
 
   const handlePress = (notification: Notification) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
     );
     onUnreadCountChange(
-      notifications.filter((n) => !n.read && n.id !== notification.id).length
+      notifications.filter((n) => !n.read && n.id !== notification.id).length,
     );
     onSelectOccurrence(notification.occurrenceId);
   };
@@ -87,15 +90,25 @@ export default function NotificationsScreen({ onSelectOccurrence, onUnreadCountC
       onPress={() => handlePress(item)}
       activeOpacity={0.7}
     >
-      <View style={[styles.dot, { backgroundColor: item.read ? '#ccc' : '#E53935' }]} />
+      <View
+        style={[
+          styles.dot,
+          { backgroundColor: item.read ? "#ccc" : "#E53935" },
+        ]}
+      />
       <View style={styles.itemContent}>
         <View style={styles.itemHeader}>
-          <Text style={[styles.itemTitle, !item.read && styles.itemTitleUnread]} numberOfLines={1}>
+          <Text
+            style={[styles.itemTitle, !item.read && styles.itemTitleUnread]}
+            numberOfLines={1}
+          >
             {item.title}
           </Text>
-          <Text style={styles.itemTime}>{item.tempoAtras ?? ''}</Text>
+          <Text style={styles.itemTime}>{item.tempoAtras ?? ""}</Text>
         </View>
-        <Text style={styles.itemBody} numberOfLines={2}>{item.body}</Text>
+        <Text style={styles.itemBody} numberOfLines={2}>
+          {item.body}
+        </Text>
         {!item.read && (
           <View style={styles.unreadBadge}>
             <Text style={styles.unreadBadgeText}>Não lida</Text>
@@ -106,7 +119,7 @@ export default function NotificationsScreen({ onSelectOccurrence, onUnreadCountC
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.title}>Notificações</Text>
@@ -134,7 +147,9 @@ export default function NotificationsScreen({ onSelectOccurrence, onUnreadCountC
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           ListEmptyComponent={
             <EmptyState
-              icon={<Ionicons name="notifications-outline" size={48} color="#ccc" />}
+              icon={
+                <Ionicons name="notifications-outline" size={48} color="#ccc" />
+              }
               message="Nenhuma notificação"
             />
           }
@@ -145,56 +160,66 @@ export default function NotificationsScreen({ onSelectOccurrence, onUnreadCountC
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 12,
   },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e' },
-  unreadCount: { fontSize: 13, color: '#E53935', marginTop: 2 },
+  title: { fontSize: 22, fontWeight: "bold", color: "#1a1a2e" },
+  unreadCount: { fontSize: 13, color: "#E53935", marginTop: 2 },
   markAllBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     marginTop: 4,
   },
-  markAllText: { fontSize: 12, color: '#666' },
-  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  markAllText: { fontSize: 12, color: "#666" },
+  loadingContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
   list: { paddingHorizontal: 16, paddingBottom: 20 },
   item: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 14,
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
   },
-  itemUnread: { borderLeftWidth: 3, borderLeftColor: '#E53935' },
-  dot: { width: 10, height: 10, borderRadius: 5, marginTop: 5, marginRight: 12 },
+  itemUnread: { borderLeftWidth: 3, borderLeftColor: "#E53935" },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    marginRight: 12,
+  },
   itemContent: { flex: 1 },
-  itemHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  itemTitle: { flex: 1, fontSize: 14, color: '#555', marginRight: 8 },
-  itemTitleUnread: { fontWeight: 'bold', color: '#222' },
-  itemTime: { fontSize: 11, color: '#aaa' },
-  itemBody: { fontSize: 13, color: '#777', lineHeight: 18 },
+  itemHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  itemTitle: { flex: 1, fontSize: 14, color: "#555", marginRight: 8 },
+  itemTitleUnread: { fontWeight: "bold", color: "#222" },
+  itemTime: { fontSize: 11, color: "#aaa" },
+  itemBody: { fontSize: 13, color: "#777", lineHeight: 18 },
   unreadBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FFEBEE',
+    alignSelf: "flex-start",
+    backgroundColor: "#FFEBEE",
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 2,
     marginTop: 6,
   },
-  unreadBadgeText: { fontSize: 11, color: '#E53935', fontWeight: 'bold' },
+  unreadBadgeText: { fontSize: 11, color: "#E53935", fontWeight: "bold" },
 });
