@@ -1,24 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import AuthScreen from '../screens/AuthScreen';
-import MapScreen from '../screens/MapScreen';
-import OccurrenceDetailScreen from '../screens/OccurrenceDetailScreen';
-import ReportScreen from '../screens/ReportScreen';
-import EmergencyScreen from '../screens/EmergencyScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import { clearToken, getOcorrencias, getMeuPerfil } from '../services/api';
-import { Occurrence, UrgencyLevel, User } from '../types';
+import React, { useState, useEffect } from "react";
+import { StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import AuthScreen from "../screens/AuthScreen";
+import MapScreen from "../screens/MapScreen";
+import OccurrenceDetailScreen from "../screens/OccurrenceDetailScreen";
+import ReportScreen from "../screens/ReportScreen";
+import EmergencyScreen from "../screens/EmergencyScreen";
+import NotificationsScreen from "../screens/NotificationsScreen";
+import ProfileScreen from "../screens/ProfileScreen";
+import { clearToken } from "../services/api";
+import { getOcorrencias } from "../services/occurence";
+import { getMeuPerfil } from "../services/profile";
+import { Occurrence, UrgencyLevel, User } from "../types";
 
 const Tab = createBottomTabNavigator();
 
-const VALID_URGENCY = new Set<string>(['alert', 'severe', 'critical']);
+const VALID_URGENCY = new Set<string>(["alert", "severe", "critical"]);
 function toUrgency(value: string): UrgencyLevel {
-  return VALID_URGENCY.has(value) ? (value as UrgencyLevel) : 'alert';
+  return VALID_URGENCY.has(value) ? (value as UrgencyLevel) : "alert";
 }
 
 function MainTabs({
@@ -41,9 +43,12 @@ function MainTabs({
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: [styles.tabBar, { height: 58 + insets.bottom, paddingBottom: insets.bottom }],
-        tabBarActiveTintColor: '#FF6B35',
-        tabBarInactiveTintColor: '#888',
+        tabBarStyle: [
+          styles.tabBar,
+          { height: 58 + insets.bottom, paddingBottom: insets.bottom },
+        ],
+        tabBarActiveTintColor: "#FF6B35",
+        tabBarInactiveTintColor: "#888",
         tabBarLabelStyle: { fontSize: 11, marginBottom: 4 },
       }}
     >
@@ -51,7 +56,11 @@ function MainTabs({
         name="Mapa"
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'map' : 'map-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused ? "map" : "map-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       >
@@ -68,7 +77,11 @@ function MainTabs({
         component={ReportScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'megaphone' : 'megaphone-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused ? "megaphone" : "megaphone-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -79,7 +92,7 @@ function MainTabs({
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <MaterialCommunityIcons
-              name={focused ? 'alarm-light' : 'alarm-light-outline'}
+              name={focused ? "alarm-light" : "alarm-light-outline"}
               size={size}
               color={color}
             />
@@ -91,10 +104,14 @@ function MainTabs({
         name="Alertas"
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'notifications' : 'notifications-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused ? "notifications" : "notifications-outline"}
+              size={size}
+              color={color}
+            />
           ),
           tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-          tabBarBadgeStyle: { backgroundColor: '#E53935' },
+          tabBarBadgeStyle: { backgroundColor: "#E53935" },
         }}
       >
         {() => (
@@ -109,7 +126,11 @@ function MainTabs({
         name="Perfil"
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       >
@@ -121,9 +142,15 @@ function MainTabs({
 
 export default function AppNavigator() {
   const [authenticated, setAuthenticated] = useState(false);
-  const [selectedOccurrenceId, setSelectedOccurrenceId] = useState<string | null>(null);
+  const [selectedOccurrenceId, setSelectedOccurrenceId] = useState<
+    string | null
+  >(null);
   const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
-  const [user, setUser] = useState<User>({ nome: '', email: '', raioAlertasKm: 30 });
+  const [user, setUser] = useState<User>({
+    nome: "",
+    email: "",
+    raioAlertasKm: 30,
+  });
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -148,8 +175,8 @@ export default function AppNavigator() {
             distance: o.distance,
             firefightersDispatched: o.firefightersDispatched,
             reportedBy: o.reportedBy,
-          }))
-        )
+          })),
+        ),
       )
       .catch(() => {});
   }, [authenticated]);
@@ -161,14 +188,14 @@ export default function AppNavigator() {
   const handleLogout = () => {
     clearToken();
     setAuthenticated(false);
-    setUser({ nome: '', email: '', raioAlertasKm: 30 });
+    setUser({ nome: "", email: "", raioAlertasKm: 30 });
     setOccurrences([]);
     setUnreadCount(0);
     setSelectedOccurrenceId(null);
   };
 
   const selectedOccurrence = selectedOccurrenceId
-    ? occurrences.find((o) => o.id === selectedOccurrenceId) ?? null
+    ? (occurrences.find((o) => o.id === selectedOccurrenceId) ?? null)
     : null;
 
   if (!authenticated) {
@@ -206,8 +233,8 @@ export default function AppNavigator() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#1a1a2e',
-    borderTopColor: '#0f3460',
+    backgroundColor: "#1a1a2e",
+    borderTopColor: "#0f3460",
     borderTopWidth: 1,
     paddingTop: 4,
   },
