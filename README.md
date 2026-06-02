@@ -6,22 +6,22 @@ Plataforma móvel de monitoramento, análise e reporte de incêndios florestais.
 
 ## Telas
 
-| Tela | Descrição |
-|---|---|
-| **Login / Cadastro** | Autenticação com e-mail e senha, criação de conta com localização opcional |
-| **Mapa de Ocorrências** | Visão geoespacial dos focos com marcadores coloridos por nível de urgência e filtros rápidos |
-| **Detalhes da Ocorrência** | Dados climáticos, distância, área afetada e status do Corpo de Bombeiros |
-| **Reportar Ocorrência** | Formulário com GPS automático, câmera/galeria e classificação do evento |
-| **Emergência** | Quick-dial 193/199/192, guia de sobrevivência e abrigos mais próximos |
-| **Notificações** | Histórico de alertas com marcação de lido/não lido e navegação para o evento |
-| **Perfil** | Edição de dados, slider de raio de alertas e histórico de reportes do usuário |
+| Tela                       | Descrição                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| **Login / Cadastro**       | Autenticação com e-mail e senha, criação de conta com localização opcional                   |
+| **Mapa de Ocorrências**    | Visão geoespacial dos focos com marcadores coloridos por nível de urgência e filtros rápidos |
+| **Detalhes da Ocorrência** | Dados climáticos, distância, área afetada e status do Corpo de Bombeiros                     |
+| **Reportar Ocorrência**    | Formulário com GPS automático, câmera/galeria e classificação do evento                      |
+| **Emergência**             | Quick-dial 193/199/192, guia de sobrevivência e abrigos mais próximos                        |
+| **Notificações**           | Histórico de alertas com marcação de lido/não lido e navegação para o evento                 |
+| **Perfil**                 | Edição de dados, slider de raio de alertas e histórico de reportes do usuário                |
 
 ## Níveis de urgência
 
-| Cor | Nível | Descrição |
-|---|---|---|
-| 🟡 Amarelo | Alerta | Fumaça suspeita ou fogo de pequeno porte |
-| 🟠 Laranja | Grave | Fogo em expansão, equipes em alerta |
+| Cor         | Nível   | Descrição                                    |
+| ----------- | ------- | -------------------------------------------- |
+| 🟡 Amarelo  | Alerta  | Fumaça suspeita ou fogo de pequeno porte     |
+| 🟠 Laranja  | Grave   | Fogo em expansão, equipes em alerta          |
 | 🔴 Vermelho | Crítico | Incêndio de grande proporção, risco imediato |
 
 ---
@@ -95,17 +95,6 @@ fire-shield-mobile/
 ├── index.ts                      # Entry point com registro do app
 └── app.json                      # Configuração Expo
 ```
-
----
-
-## Dados Mockados
-
-O aplicativo funciona inteiramente com dados locais — não há back-end nem chamadas HTTP. Os dados estão em [`src/data/mockData.ts`](src/data/mockData.ts) e incluem:
-
-- 5 focos de incêndio com diferentes níveis de urgência, condições climáticas e status
-- 5 notificações com estado de leitura
-- 2 reportes anteriores do usuário
-- 3 abrigos de emergência simulados
 
 ---
 
