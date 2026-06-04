@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -30,6 +30,7 @@ function MainTabs({
   onLogout,
   unreadCount,
   onUnreadCountChange,
+  onReportSuccess,
 }: {
   occurrences: Occurrence[];
   user: User;
@@ -37,6 +38,7 @@ function MainTabs({
   onLogout: () => void;
   unreadCount: number;
   onUnreadCountChange: (count: number) => void;
+  onReportSuccess: () => void;
 }) {
   const insets = useSafeAreaInsets();
   return (
@@ -74,7 +76,6 @@ function MainTabs({
 
       <Tab.Screen
         name="Reportar"
-        component={ReportScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
@@ -84,7 +85,9 @@ function MainTabs({
             />
           ),
         }}
-      />
+      >
+        {() => <ReportScreen onReportSuccess={onReportSuccess} />}
+      </Tab.Screen>
 
       <Tab.Screen
         name="Emergência"
@@ -153,13 +156,7 @@ export default function AppNavigator() {
   });
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    if (!authenticated) return;
-
-    getMeuPerfil()
-      .then(setUser)
-      .catch(() => {});
-
+  const fetchOccurrences = useCallback(() => {
     getOcorrencias()
       .then((items) =>
         setOccurrences(
@@ -179,7 +176,13 @@ export default function AppNavigator() {
         ),
       )
       .catch(() => {});
-  }, [authenticated]);
+  }, []);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    getMeuPerfil().then(setUser).catch(() => {});
+    fetchOccurrences();
+  }, [authenticated, fetchOccurrences]);
 
   const handleLogin = () => {
     setAuthenticated(true);
@@ -226,6 +229,7 @@ export default function AppNavigator() {
         onLogout={handleLogout}
         unreadCount={unreadCount}
         onUnreadCountChange={setUnreadCount}
+        onReportSuccess={fetchOccurrences}
       />
     </NavigationContainer>
   );

@@ -41,7 +41,7 @@ const TYPE_TO_DISTANCE: Record<ReportType, number> = {
   "Fogo de grande proporção": 30,
 };
 
-export default function ReportScreen() {
+export default function ReportScreen({ onReportSuccess }: { onReportSuccess?: () => void }) {
   const [selectedType, setSelectedType] = useState<ReportType | null>(null);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
@@ -92,6 +92,7 @@ export default function ReportScreen() {
       setSubmitted(true);
       setSelectedType(null);
       setDescription("");
+      onReportSuccess?.();
       setTimeout(() => setSubmitted(false), 3000);
     } catch (e: any) {
       Alert.alert("Erro", e.message ?? "Não foi possível enviar o alerta.");
