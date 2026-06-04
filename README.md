@@ -4,6 +4,14 @@ Plataforma móvel de monitoramento, análise e reporte de incêndios florestais.
 
 ---
 
+## Integrantes do Grupo
+
+Wendell Nascimento Dourado – 559336
+Daniel Santana Corrêa Batista – 559622
+Jonas de Jesus Campos de Oliveira - 561144
+
+---
+
 ## Vídeo explicativo
 
 ```
