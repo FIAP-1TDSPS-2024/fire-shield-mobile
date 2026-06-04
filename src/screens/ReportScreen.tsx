@@ -31,14 +31,14 @@ const TYPE_TO_URGENCY: Record<ReportType, string> = {
 
 const TYPE_TO_AREA: Record<ReportType, number> = {
   "Fumaça suspeita": 0,
-  "Fogo rasteiro": 5,
-  "Fogo de grande proporção": 20,
+  "Fogo rasteiro": 10,
+  "Fogo de grande proporção": 30,
 };
 
 const TYPE_TO_DISTANCE: Record<ReportType, number> = {
   "Fumaça suspeita": 0,
-  "Fogo rasteiro": 1,
-  "Fogo de grande proporção": 5,
+  "Fogo rasteiro": 10,
+  "Fogo de grande proporção": 30,
 };
 
 export default function ReportScreen() {
