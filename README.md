@@ -4,6 +4,14 @@ Plataforma móvel de monitoramento, análise e reporte de incêndios florestais.
 
 ---
 
+## Vídeo explicativo
+
+```
+https://youtube.com/shorts/PWZaaqZdBOA
+```
+
+---
+
 ## Telas
 
 | Tela                       | Descrição                                                                                    |
@@ -37,6 +45,23 @@ Plataforma móvel de monitoramento, análise e reporte de incêndios florestais.
 - **expo-image-picker** — câmera e galeria para anexar fotos ao reporte
 - **react-native-gesture-handler** — gestos nativos para navegação
 - **react-native-safe-area-context** — adaptação a notch e barra de navegação do sistema
+
+---
+
+## Back-end
+
+A API REST está hospedada em `https://app-fire-shield.azurewebsites.net/api`. Todas as requisições autenticadas enviam o token JWT no header `Authorization: Bearer <token>`.
+
+| Endpoint                  | Método | Descrição                                   |
+| ------------------------- | ------ | ------------------------------------------- |
+| `/auth/login`             | POST   | Autenticação e obtenção do token            |
+| `/auth/registrar`         | POST   | Criação de nova conta                       |
+| `/ocorrencias`            | GET    | Lista todas as ocorrências                  |
+| `/ocorrencias`            | POST   | Registra uma nova ocorrência                |
+| `/notificacoes?lat=&lon=` | GET    | Notificações próximas à posição do usuário  |
+| `/usuarios/meu-perfil`    | GET    | Dados do perfil do usuário autenticado      |
+| `/usuarios/editar-perfil` | PUT    | Atualiza nome, localidade e raio de alertas |
+| `/usuarios/deletar-conta` | DELETE | Remove a conta do usuário                   |
 
 ---
 
@@ -77,9 +102,23 @@ npm run ios
 fire-shield-mobile/
 ├── src/
 │   ├── types/
-│   │   └── index.ts              # Tipos TypeScript globais
-│   ├── data/
-│   │   └── mockData.ts           # Dados mockados (ocorrências, notificações, usuário)
+│   │   └── index.ts                    # Tipos TypeScript globais
+│   ├── constants/
+│   │   └── urgency.ts                  # Mapeamento de cores e rótulos por nível de urgência
+│   ├── utils/
+│   │   ├── date.ts                     # Formatação de datas
+│   │   └── location.ts                 # Helpers de geolocalização
+│   ├── services/
+│   │   ├── api.ts                      # Cliente HTTP base (fetch + token JWT)
+│   │   ├── auth.ts                     # login() e registrar()
+│   │   ├── occurence.ts                # getOcorrencias() e criarOcorrencia()
+│   │   ├── notification.ts             # getNotificacoes()
+│   │   └── profile.ts                  # getMeuPerfil(), editarPerfil() e deletarConta()
+│   ├── components/
+│   │   ├── EmptyState.tsx              # Tela de estado vazio reutilizável
+│   │   ├── InfoCard.tsx                # Card genérico de informações
+│   │   ├── OccurrenceMapMarker.tsx     # Marcador de ocorrência no mapa
+│   │   └── SectionTitle.tsx            # Título de seção
 │   ├── screens/
 │   │   ├── AuthScreen.tsx
 │   │   ├── MapScreen.tsx
@@ -89,11 +128,11 @@ fire-shield-mobile/
 │   │   ├── NotificationsScreen.tsx
 │   │   └── ProfileScreen.tsx
 │   └── navigation/
-│       └── AppNavigator.tsx      # Fluxo auth → tabs → detalhe
-├── assets/                       # Ícones e imagens do app
-├── App.tsx                       # Entry point do componente raiz
-├── index.ts                      # Entry point com registro do app
-└── app.json                      # Configuração Expo
+│       └── AppNavigator.tsx            # Fluxo auth → tabs → detalhe
+├── assets/                             # Ícones e imagens do app
+├── App.tsx                             # Entry point do componente raiz
+├── index.ts                            # Entry point com registro do app
+└── app.json                            # Configuração Expo
 ```
 
 ---
